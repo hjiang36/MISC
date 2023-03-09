@@ -9,11 +9,11 @@
   <body>
     <h1 class="h2">FlyInterface Demo</h1>
     <p>Please login with API key to kick start</p>
-    <form action="/home" method="post">
+    <form action="/home/" method="post">
         {% csrf_token %}
         <div class="mb-3">
             <label for="APIKeyInput" class="form-label">Flywheel API Key</label>
-            <input type="text" class="form-control" name="APIKey" id="APIKeyInput" placeholder="APIKey" aria-label="APIKey" aria-describedby="addon-wrapping">
+            <input type="text" class="form-control" name="api_key" id="APIKeyInput" placeholder="APIKey" aria-label="APIKey" aria-describedby="addon-wrapping">
         </div>
         <button type="submit" class="btn btn-primary">Login</button>
     </form>
