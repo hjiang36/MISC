@@ -10,4 +10,5 @@ class FwContextInfo:
     def __init__(self) -> None:
         self.user = FwUserInfo()
         self.projects = []
+        self.files = []
         self.current_path = 'wandell/'
