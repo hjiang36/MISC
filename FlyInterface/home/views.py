@@ -39,11 +39,11 @@ def imagej_viewer(request, file_path):
 def index(request, root_path=''):
     if request.method == 'POST':
         request.session['api_key'] = request.POST['api_key']
-        response = redirect('/')
+        response = redirect('/home/projects/wandell')
         return response
     
-    if not root_path:
-        root_path = 'wandell'
+    if not root_path and 'api_key' in request.session:
+        del request.session['api_key']
     
     if 'api_key' in request.session:
         fw_client = flywheel.Client(request.session['api_key'])

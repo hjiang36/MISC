@@ -9,25 +9,25 @@
   <body>
     <h1 class="h2">Welcome {{ context.user.first_name }} {{ context.user.last_name }} </h1>
     {% if context.projects %}
-    <p> Found {{ context.projects|length }} subpath in {{ context.current_path }} </p>
-    <ul>
+    <p> Retrieved {{ context.projects|length }} subpath in {{ context.current_path }} </p>
+    <div class="list-group" style="width: 50%; margin-left: 10px;">
       {% for project in context.projects %}
       {% with full_path=context.current_path|add:project.label %}
-      <li><a href="{% url 'project-sites' full_path %}">{{ full_path }}</a></li>
+      <a class="list-group-item list-group-item-action" href="{% url 'project-sites' full_path %}">{{ project.label }}</a>
       {% endwith %}
       {% endfor %}
-    </ul>
+    </div>
     {% endif %}
 
     {% if context.files %}
     <p> Found {{ context.files|length }} files in {{ context.current_path }} </p>
-    <ul>
+    <div class="list-group" style="width: 50%; margin-left: 10px;">
       {% for file_entry in context.files %}
       {% with full_path=context.current_path|add:file_entry.name %}
-      <li><a href="{% url 'imagej-viewer' full_path %}">{{ file_entry.name }}</a></li>
+      <a class="list-group-item list-group-item-action" href="{% url 'imagej-viewer' full_path %}">{{ file_entry.name }}</a>
       {% endwith %}
       {% endfor %}
-    </ul>
+    </div>
     {% endif %}
 
 
