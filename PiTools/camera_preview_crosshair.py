@@ -28,18 +28,23 @@ def update_image():
     frame = picam2.capture_array()
     
     # Convert to PIL image for drawing (ensure it's RGBA for transparency support)
-    image = Image.fromarray(frame).convert('RGBA')
-    draw = ImageDraw.Draw(image)
+    image = Image.fromarray(frame)
+    
+    # Create a transparent overlay
+    overlay = Image.new("RGBA", image.size, (255, 255, 255, 0))
+    draw = ImageDraw.Draw(overlay)
 
     # Draw the red cross overlay with half transparency
-    cross_color = (255, 0, 0, 128)  # Red with alpha at 128
+    cross_color = (255, 0, 0, 128) # Red with 50% transparency
     center_x, center_y = image.width // 2, image.height // 2
     line_length = 32
     draw.line((center_x - line_length, center_y, center_x + line_length, center_y), fill=cross_color, width=3)
     draw.line((center_x, center_y - line_length, center_x, center_y + line_length), fill=cross_color, width=3)
     
+    # Composite the overlay onto the image
+    image.paste(overlay, (0, 0), overlay)
+
     # Convert the image for Tkinter
-    image = Image.alpha_composite(Image.new('RGBA', image.size), image)  # Composite the transparent draw over a transparent background
     tk_image = ImageTk.PhotoImage(image=image.convert("RGB"))  # Convert back to RGB for Tkinter compatibility
     
     # Update the label with the new image
