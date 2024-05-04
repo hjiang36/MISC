@@ -27,24 +27,25 @@ def update_image():
     # Get an image from the camera
     frame = picam2.capture_array()
     
-    # Convert to PIL image for drawing
-    image = Image.fromarray(frame)
+    # Convert to PIL image for drawing (ensure it's RGBA for transparency support)
+    image = Image.fromarray(frame).convert('RGBA')
     draw = ImageDraw.Draw(image)
 
-    # Draw the red cross overlay
-    cross_color = (255, 0, 0)  # Red
+    # Draw the red cross overlay with half transparency
+    cross_color = (255, 0, 0, 128)  # Red with alpha at 128
     center_x, center_y = image.width // 2, image.height // 2
-    line_length = 50
-    draw.line((center_x - line_length, center_y, center_x + line_length, center_y), fill=cross_color, width=5)
-    draw.line((center_x, center_y - line_length, center_x, center_y + line_length), fill=cross_color, width=5)
+    line_length = 32
+    draw.line((center_x - line_length, center_y, center_x + line_length, center_y), fill=cross_color, width=3)
+    draw.line((center_x, center_y - line_length, center_x, center_y + line_length), fill=cross_color, width=3)
     
     # Convert the image for Tkinter
-    tk_image = ImageTk.PhotoImage(image=image)
+    image = Image.alpha_composite(Image.new('RGBA', image.size), image)  # Composite the transparent draw over a transparent background
+    tk_image = ImageTk.PhotoImage(image=image.convert("RGB"))  # Convert back to RGB for Tkinter compatibility
     
     # Update the label with the new image
     image_label.config(image=tk_image)
     image_label.image = tk_image
-    image_label.after(10, update_image)  # Continue updating the image every 10 ms
+    image_label.after(16, update_image)  # Continue updating the image every 16 ms
 
 # Setup the image label
 image_label = tk.Label(root)
