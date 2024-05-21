@@ -77,6 +77,8 @@ def connection_handler(interface, changed, invalidated, path):
             os.system("btmgmt -i hci0 discoverable yes")
 
 if __name__ == '__main__':
+    dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
+
     bus = dbus.SystemBus()
     bus.add_signal_receiver(connection_handler,
                             dbus_interface="org.freedesktop.DBus.Properties",
