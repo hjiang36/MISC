@@ -40,7 +40,7 @@ class TextCharacteristic(dbus.service.Object):
 
         return {
             'UUID': self.uuid,
-            'Value': [dbus.Byte(ord(c)) for c in TEXT_TO_SHARE],
+            'Value': dbus.Array([dbus.Byte(ord(c)) for c in TEXT_TO_SHARE], signature='y'),
             'Flags': self.flags,
         }
 
