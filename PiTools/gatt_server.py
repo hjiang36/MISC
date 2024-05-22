@@ -19,7 +19,7 @@ class TextCharacteristic(dbus.service.Object):
     def Set(self, interface, prop, value):
         pass
 
-    @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='s', out_signature='v')
+    @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='ss', out_signature='v')
     def Get(self, interface, prop):
         if interface != 'org.bluez.GattCharacteristic1':
             raise dbus.exceptions.DBusException("Invalid interface", name='org.freedesktop.DBus.Error.InvalidArgs')
@@ -33,7 +33,7 @@ class TextCharacteristic(dbus.service.Object):
         else:
             raise dbus.exceptions.DBusException("Invalid property", name='org.freedesktop.DBus.Error.InvalidArgs')
 
-    @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='', out_signature='a{sv}')
+    @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='s', out_signature='a{sv}')
     def GetAll(self, interface):
         if interface != 'org.bluez.GattCharacteristic1':
             raise dbus.exceptions.DBusException("Invalid interface", name='org.freedesktop.DBus.Error.InvalidArgs')
@@ -58,7 +58,7 @@ class TextService(dbus.service.Object):
     def add_characteristic(self, characteristic):
         self.characteristics.append(characteristic)
 
-    @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='s', out_signature='v')
+    @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='ss', out_signature='v')
     def Get(self, interface, prop):
         if interface != 'org.bluez.GattService1':
             raise dbus.exceptions.DBusException("Invalid interface", name='org.freedesktop.DBus.Error.InvalidArgs')
@@ -72,7 +72,7 @@ class TextService(dbus.service.Object):
         else:
             raise dbus.exceptions.DBusException("Invalid property", name='org.freedesktop.DBus.Error.InvalidArgs')
 
-    @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='', out_signature='a{sv}')
+    @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='s', out_signature='a{sv}')
     def GetAll(self, interface):
         if interface != 'org.bluez.GattService1':
             raise dbus.exceptions.DBusException("Invalid interface", name='org.freedesktop.DBus.Error.InvalidArgs')
@@ -93,11 +93,11 @@ class Application(dbus.service.Object):
     def add_service(self, service):
         self.services.append(service)
 
-    @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='s', out_signature='v')
+    @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='ss', out_signature='v')
     def Get(self, interface, prop):
         raise dbus.exceptions.DBusException("Invalid interface", name='org.freedesktop.DBus.Error.InvalidArgs')
 
-    @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='', out_signature='a{sv}')
+    @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='s', out_signature='a{sv}')
     def GetAll(self, interface):
         return {}
 
