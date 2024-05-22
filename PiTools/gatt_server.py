@@ -4,59 +4,15 @@ import dbus.service
 from gi.repository import GLib
 
 GATT_SERVICE_UUID = '12345678-1234-5678-1234-56789abcdef0'
-GATT_CHARACTERISTIC_UUID = '12345678-1234-5678-1234-56789abcdef1'
-
-class Characteristic(dbus.service.Object):
-    def __init__(self, bus, index, uuid, flags):
-        self.path = f'/org/bluez/example/service{index}/char{index}'
-        self.bus = bus
-        self.uuid = uuid
-        self.flags = flags
-        dbus.service.Object.__init__(self, bus, self.path)
-        print(f"Characteristic initialized: {self.path}")
-
-    @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='ssv', out_signature='')
-    def Set(self, interface, prop, value):
-        pass
-
-    @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='ss', out_signature='v')
-    def Get(self, interface, prop):
-        print(f"Get called: {interface}, {prop}")
-        if interface != 'org.bluez.GattCharacteristic1':
-            raise dbus.exceptions.DBusException("Invalid interface", name='org.freedesktop.DBus.Error.InvalidArgs')
-
-        if prop == 'UUID':
-            return self.uuid
-        elif prop == 'Flags':
-            return self.flags
-        else:
-            raise dbus.exceptions.DBusException("Invalid property", name='org.freedesktop.DBus.Error.InvalidArgs')
-
-    @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='s', out_signature='a{sv}')
-    def GetAll(self, interface):
-        print(f"GetAll called: {interface}")
-        if interface != 'org.bluez.GattCharacteristic1':
-            raise dbus.exceptions.DBusException("Invalid interface", name='org.freedesktop.DBus.Error.InvalidArgs')
-
-        return {
-            'UUID': self.uuid,
-            'Flags': self.flags,
-        }
 
 class Service(dbus.service.Object):
     def __init__(self, bus, index):
         self.path = f'/org/bluez/example/service{index}'
         self.bus = bus
-        self.index = index
         self.uuid = GATT_SERVICE_UUID
         self.primary = True
-        self.characteristics = []
         dbus.service.Object.__init__(self, bus, self.path)
-        self.add_characteristic(Characteristic(bus, 0, GATT_CHARACTERISTIC_UUID, ['read']))
         print(f"Service initialized: {self.path}")
-
-    def add_characteristic(self, characteristic):
-        self.characteristics.append(characteristic)
 
     @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='ss', out_signature='v')
     def Get(self, interface, prop):
@@ -68,8 +24,6 @@ class Service(dbus.service.Object):
             return self.uuid
         elif prop == 'Primary':
             return self.primary
-        elif prop == 'Characteristics':
-            return dbus.Array([char.path for char in self.characteristics], signature='o')
         else:
             raise dbus.exceptions.DBusException("Invalid property", name='org.freedesktop.DBus.Error.InvalidArgs')
 
@@ -82,7 +36,6 @@ class Service(dbus.service.Object):
         return {
             'UUID': self.uuid,
             'Primary': self.primary,
-            'Characteristics': dbus.Array([char.path for char in self.characteristics], signature='o')
         }
 
 class Application(dbus.service.Object):
@@ -112,11 +65,6 @@ class Application(dbus.service.Object):
             response[service_path] = {
                 'org.bluez.GattService1': service.GetAll('org.bluez.GattService1')
             }
-            for characteristic in service.characteristics:
-                char_path = characteristic.path
-                response[char_path] = {
-                    'org.bluez.GattCharacteristic1': characteristic.GetAll('org.bluez.GattCharacteristic1')
-                }
         print(f"GetManagedObjects response: {response}")
         return response
 
