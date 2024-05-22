@@ -15,7 +15,7 @@ class TextCharacteristic(dbus.service.Object):
         self.flags = flags
         dbus.service.Object.__init__(self, bus, self.path)
 
-    @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='sv', out_signature='')
+    @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='ssv', out_signature='')
     def Set(self, interface, prop, value):
         pass
 
@@ -105,9 +105,11 @@ class Application(dbus.service.Object):
     def GetManagedObjects(self):
         response = {}
         for service in self.services:
-            response[service.path] = service.GetAll('org.bluez.GattService1')
+            service_path = service.path
+            response[service_path] = service.GetAll('org.bluez.GattService1')
             for characteristic in service.characteristics:
-                response[characteristic.path] = characteristic.GetAll('org.bluez.GattCharacteristic1')
+                char_path = characteristic.path
+                response[char_path] = characteristic.GetAll('org.bluez.GattCharacteristic1')
         return response
 
 def register_app_cb():
