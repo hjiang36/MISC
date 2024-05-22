@@ -5,15 +5,15 @@ from gi.repository import GLib
 
 GATT_SERVICE_UUID = '12345678-1234-5678-1234-56789abcdef0'
 GATT_CHARACTERISTIC_UUID = '12345678-1234-5678-1234-56789abcdef1'
-TEXT_TO_SHARE = "Hello from Raspberry Pi"
 
-class TextCharacteristic(dbus.service.Object):
+class Characteristic(dbus.service.Object):
     def __init__(self, bus, index, uuid, flags):
         self.path = f'/org/bluez/example/service{index}/char{index}'
         self.bus = bus
         self.uuid = uuid
         self.flags = flags
         dbus.service.Object.__init__(self, bus, self.path)
+        print(f"Characteristic initialized: {self.path}")
 
     @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='ssv', out_signature='')
     def Set(self, interface, prop, value):
@@ -21,13 +21,12 @@ class TextCharacteristic(dbus.service.Object):
 
     @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='ss', out_signature='v')
     def Get(self, interface, prop):
+        print(f"Get called: {interface}, {prop}")
         if interface != 'org.bluez.GattCharacteristic1':
             raise dbus.exceptions.DBusException("Invalid interface", name='org.freedesktop.DBus.Error.InvalidArgs')
 
         if prop == 'UUID':
             return self.uuid
-        elif prop == 'Value':
-            return dbus.Array([dbus.Byte(ord(c)) for c in TEXT_TO_SHARE], signature='y')
         elif prop == 'Flags':
             return self.flags
         else:
@@ -35,16 +34,16 @@ class TextCharacteristic(dbus.service.Object):
 
     @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='s', out_signature='a{sv}')
     def GetAll(self, interface):
+        print(f"GetAll called: {interface}")
         if interface != 'org.bluez.GattCharacteristic1':
             raise dbus.exceptions.DBusException("Invalid interface", name='org.freedesktop.DBus.Error.InvalidArgs')
 
         return {
             'UUID': self.uuid,
-            'Value': dbus.Array([dbus.Byte(ord(c)) for c in TEXT_TO_SHARE], signature='y'),
             'Flags': self.flags,
         }
 
-class TextService(dbus.service.Object):
+class Service(dbus.service.Object):
     def __init__(self, bus, index):
         self.path = f'/org/bluez/example/service{index}'
         self.bus = bus
@@ -53,13 +52,15 @@ class TextService(dbus.service.Object):
         self.primary = True
         self.characteristics = []
         dbus.service.Object.__init__(self, bus, self.path)
-        self.add_characteristic(TextCharacteristic(bus, 0, GATT_CHARACTERISTIC_UUID, ['read']))
+        self.add_characteristic(Characteristic(bus, 0, GATT_CHARACTERISTIC_UUID, ['read']))
+        print(f"Service initialized: {self.path}")
 
     def add_characteristic(self, characteristic):
         self.characteristics.append(characteristic)
 
     @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='ss', out_signature='v')
     def Get(self, interface, prop):
+        print(f"Get called: {interface}, {prop}")
         if interface != 'org.bluez.GattService1':
             raise dbus.exceptions.DBusException("Invalid interface", name='org.freedesktop.DBus.Error.InvalidArgs')
 
@@ -74,6 +75,7 @@ class TextService(dbus.service.Object):
 
     @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='s', out_signature='a{sv}')
     def GetAll(self, interface):
+        print(f"GetAll called: {interface}")
         if interface != 'org.bluez.GattService1':
             raise dbus.exceptions.DBusException("Invalid interface", name='org.freedesktop.DBus.Error.InvalidArgs')
 
@@ -88,7 +90,8 @@ class Application(dbus.service.Object):
         self.path = '/org/bluez/example'
         self.services = []
         dbus.service.Object.__init__(self, bus, self.path)
-        self.add_service(TextService(bus, 0))
+        self.add_service(Service(bus, 0))
+        print("Application initialized")
 
     def add_service(self, service):
         self.services.append(service)
@@ -114,6 +117,7 @@ class Application(dbus.service.Object):
                 response[char_path] = {
                     'org.bluez.GattCharacteristic1': characteristic.GetAll('org.bluez.GattCharacteristic1')
                 }
+        print(f"GetManagedObjects response: {response}")
         return response
 
 def register_app_cb():
