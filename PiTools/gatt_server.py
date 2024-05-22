@@ -27,7 +27,7 @@ class TextCharacteristic(dbus.service.Object):
         if prop == 'UUID':
             return self.uuid
         elif prop == 'Value':
-            return [dbus.Byte(ord(c)) for c in TEXT_TO_SHARE]
+            return dbus.Array([dbus.Byte(ord(c)) for c in TEXT_TO_SHARE], signature='y')
         elif prop == 'Flags':
             return self.flags
         else:
@@ -106,10 +106,14 @@ class Application(dbus.service.Object):
         response = {}
         for service in self.services:
             service_path = service.path
-            response[service_path] = service.GetAll('org.bluez.GattService1')
+            response[service_path] = {
+                'org.bluez.GattService1': service.GetAll('org.bluez.GattService1')
+            }
             for characteristic in service.characteristics:
                 char_path = characteristic.path
-                response[char_path] = characteristic.GetAll('org.bluez.GattCharacteristic1')
+                response[char_path] = {
+                    'org.bluez.GattCharacteristic1': characteristic.GetAll('org.bluez.GattCharacteristic1')
+                }
         return response
 
 def register_app_cb():
