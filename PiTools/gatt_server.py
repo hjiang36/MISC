@@ -2,6 +2,7 @@ import dbus
 import dbus.mainloop.glib
 import dbus.service
 from gi.repository import GLib
+import subprocess
 
 GATT_SERVICE_UUID = '12345678-1234-5678-1234-56789abcdef0'
 
@@ -75,6 +76,14 @@ def register_app_error_cb(error):
     print(f"Failed to register application: {error}")
     mainloop.quit()
 
+def start_advertising():
+    subprocess.run(['sudo', 'hciconfig', 'hci0', 'up'])
+    subprocess.run(['sudo', 'hciconfig', 'hci0', 'leadv', '3'])
+    subprocess.run(['sudo', 'hciconfig', 'hci0', 'noscan'])
+    # Start advertising using bluetoothctl
+    subprocess.run(['sudo', 'bluetoothctl', 'advertise', 'on'])
+    print("Advertising started")
+
 dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 bus = dbus.SystemBus()
 
@@ -90,4 +99,5 @@ service_manager.RegisterApplication(app.path, {},
                                     reply_handler=register_app_cb,
                                     error_handler=register_app_error_cb)
 
+start_advertising()
 mainloop.run()
