@@ -129,7 +129,7 @@ def register_app_error_cb(error):
     print(f"Failed to register application: {error}")
     mainloop.quit()
 
-def start_advertising(bus, adapter_path):
+def start_advertising(bus):
     adapter = dbus.Interface(bus.get_object("org.bluez", adapter_path), "org.bluez.Adapter1")
     adapter.StartDiscovery()
     print("Advertising started")
@@ -144,10 +144,10 @@ adapter.Set('org.bluez.Adapter1', 'Powered', dbus.Boolean(1))
 service_manager = dbus.Interface(bus.get_object('org.bluez', adapter_path), 'org.bluez.GattManager1')
 app = Application(bus)
 
-mainloop = GLib.MainLoop()
 service_manager.RegisterApplication(app.path, {},
                                     reply_handler=register_app_cb,
                                     error_handler=register_app_error_cb)
 
 start_advertising()
+mainloop = GLib.MainLoop()
 mainloop.run()
