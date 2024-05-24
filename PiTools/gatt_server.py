@@ -61,7 +61,6 @@ class Service(dbus.service.Object):
         self.uuid = GATT_SERVICE_UUID
         self.primary = True
         self.characteristics = []
-        self.type = "gatt"
         dbus.service.Object.__init__(self, bus, self.path)
         self.add_characteristic(WiFiCharacteristic(bus, 0, WIFI_CHARACTERISTIC_UUID, self))
         print(f"Service initialized: {self.path}")
@@ -113,13 +112,20 @@ class Application(dbus.service.Object):
     def GetAll(self, interface):
         return {}
 
-    @dbus.service.method('org.freedesktop.DBus.ObjectManager', out_signature='a{oa{sa{sv}}}')
+    @dbus.service.method('org.freedesktop.DBus.ObjectManager', in_signature='', out_signature='a{oa{sa{sv}}}')
     def GetManagedObjects(self):
         response = {}
         for service in self.services:
-            response[service.path] = service.get_properties()
+            service_path = service.path
+            response[service_path] = {
+                'org.bluez.GattService1': service.GetAll('org.bluez.GattService1')
+            }
             for characteristic in service.characteristics:
-                response[characteristic.path] = characteristic.get_properties()
+                char_path = characteristic.path
+                response[char_path] = {
+                    'org.bluez.GattCharacteristic1': characteristic.GetAll('org.bluez.GattCharacteristic1')
+                }
+        print(f"GetManagedObjects response: {response}")
         return response
 
 def register_app_cb():
@@ -130,25 +136,26 @@ def register_app_error_cb(error):
     mainloop.quit()
 
 def start_advertising():
-    adapter = dbus.Interface(bus.get_object("org.bluez", adapter_path), "org.bluez.Adapter1")
-    adapter.StartDiscovery()
+    subprocess.run(['sudo', 'hciconfig', 'hci0', 'up'])
+    subprocess.run(['sudo', 'hciconfig', 'hci0', 'leadv', '3'])
+    subprocess.run(['sudo', 'hciconfig', 'hci0', 'noscan'])
+    subprocess.run(['sudo', 'bluetoothctl', 'advertise', 'on'])
     print("Advertising started")
 
 dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 bus = dbus.SystemBus()
-manager = dbus.Interface(bus.get_object("org.bluez", "/"), "org.freedesktop.DBus.ObjectManager")
-adapter_path = '/org/bluez/hci0'
-print('Adapter Path: ', adapter_path)
 
+adapter_path = '/org/bluez/hci0'
 adapter = dbus.Interface(bus.get_object('org.bluez', adapter_path), 'org.freedesktop.DBus.Properties')
 adapter.Set('org.bluez.Adapter1', 'Powered', dbus.Boolean(1))
 
 service_manager = dbus.Interface(bus.get_object('org.bluez', adapter_path), 'org.bluez.GattManager1')
 app = Application(bus)
-start_advertising()
+
 mainloop = GLib.MainLoop()
 service_manager.RegisterApplication(app.path, {},
                                     reply_handler=register_app_cb,
                                     error_handler=register_app_error_cb)
 
+start_advertising()
 mainloop.run()
