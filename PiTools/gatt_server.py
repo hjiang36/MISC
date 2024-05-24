@@ -3,7 +3,6 @@ import dbus.mainloop.glib
 import dbus.service
 from gi.repository import GLib
 import subprocess
-import socket
 
 GATT_SERVICE_UUID = '12345678-1234-5678-1234-56789abcdef0'
 WIFI_CHARACTERISTIC_UUID = '87654321-4321-6789-4321-56789abcdef0'
@@ -20,13 +19,10 @@ class WiFiCharacteristic(dbus.service.Object):
 
     def get_wifi_status(self):
         try:
-            # Check if connected to WiFi
             result = subprocess.run(['iwgetid'], capture_output=True, text=True)
             if result.returncode != 0:
                 return "Not connected"
             ssid = result.stdout.strip().split('"')[1]
-
-            # Get the IP address
             ip_address = subprocess.run(['hostname', '-I'], capture_output=True, text=True).stdout.strip()
             return f"Connected to {ssid}, IP: {ip_address}"
         except Exception as e:
