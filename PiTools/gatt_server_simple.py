@@ -19,10 +19,11 @@ def register_service():
 
     # Register the custom service
     service_props = {
+        "Type": dbus.String("gatt"),  # This line is crucial!
         "UUID": dbus.String(SERVICE_UUID),
         "Primary": dbus.Boolean(True)
     }
-    service_path = bus.get_object("org.bluez", adapter_path).AddService(service_props)
+    service_path = bus.get_object("org.bluez", adapter_path).AddService(service_props)  # Change here
     
     # Register the characteristic
     char_props = {
@@ -31,7 +32,7 @@ def register_service():
         "Value": dbus.Array([dbus.Byte(ord(c)) for c in HELLO_MESSAGE], signature=dbus.Signature('y')),
         "Flags": dbus.Array(["read"], signature=dbus.Signature('s'))
     }
-    bus.get_object("org.bluez", service_path).AddCharacteristic(char_props)
+    bus.get_object("org.bluez", service_path).AddCharacteristic(char_props)  # Change here
 
 def start_advertising():
     adapter = dbus.Interface(bus.get_object("org.bluez", adapter_path), "org.bluez.Adapter1")
