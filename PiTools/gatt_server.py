@@ -129,7 +129,7 @@ def register_app_error_cb(error):
     print(f"Failed to register application: {error}")
     mainloop.quit()
 
-def start_advertising(bus):
+def start_advertising():
     adapter = dbus.Interface(bus.get_object("org.bluez", adapter_path), "org.bluez.Adapter1")
     adapter.StartDiscovery()
     print("Advertising started")
