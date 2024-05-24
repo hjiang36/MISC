@@ -137,7 +137,7 @@ def start_advertising():
 dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 bus = dbus.SystemBus()
 manager = dbus.Interface(bus.get_object("org.bluez", "/"), "org.freedesktop.DBus.ObjectManager")
-adapter_path = list(manager.GetManagedObjects().keys())[0]
+adapter_path = '/org/bluez/hci0'
 print('Adapter Path: ', adapter_path)
 
 adapter = dbus.Interface(bus.get_object('org.bluez', adapter_path), 'org.freedesktop.DBus.Properties')
