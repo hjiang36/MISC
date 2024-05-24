@@ -129,11 +129,9 @@ def register_app_error_cb(error):
     print(f"Failed to register application: {error}")
     mainloop.quit()
 
-def start_advertising():
-    subprocess.run(['sudo', 'hciconfig', 'hci0', 'up'])
-    subprocess.run(['sudo', 'hciconfig', 'hci0', 'leadv', '3'])
-    subprocess.run(['sudo', 'hciconfig', 'hci0', 'noscan'])
-    subprocess.run(['sudo', 'bluetoothctl', 'advertise', 'on'])
+def start_advertising(bus, adapter_path):
+    adapter = dbus.Interface(bus.get_object("org.bluez", adapter_path), "org.bluez.Adapter1")
+    adapter.StartDiscovery()
     print("Advertising started")
 
 dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
