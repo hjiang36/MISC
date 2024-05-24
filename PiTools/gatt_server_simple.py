@@ -22,8 +22,8 @@ def register_service():
         "UUID": dbus.String(SERVICE_UUID),
         "Primary": dbus.Boolean(True)
     }
-    service_path = bus.get_object("org.bluez", adapter_path).AddService(service_props, dbus.Array([], signature=dbus.Signature('o')))
-
+    service_path = bus.get_object("org.bluez", adapter_path).AddService(service_props)
+    
     # Register the characteristic
     char_props = {
         "UUID": dbus.String(CHARACTERISTIC_UUID),
@@ -31,7 +31,7 @@ def register_service():
         "Value": dbus.Array([dbus.Byte(ord(c)) for c in HELLO_MESSAGE], signature=dbus.Signature('y')),
         "Flags": dbus.Array(["read"], signature=dbus.Signature('s'))
     }
-    bus.get_object("org.bluez", service_path).AddCharacteristic(char_props, dbus.Array([], signature=dbus.Signature('o')))
+    bus.get_object("org.bluez", service_path).AddCharacteristic(char_props)
 
 def start_advertising():
     adapter = dbus.Interface(bus.get_object("org.bluez", adapter_path), "org.bluez.Adapter1")
