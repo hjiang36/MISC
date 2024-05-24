@@ -144,8 +144,9 @@ adapter.Set('org.bluez.Adapter1', 'Powered', dbus.Boolean(1))
 service_manager = dbus.Interface(bus.get_object('org.bluez', adapter_path), 'org.bluez.GattManager1')
 app = Application(bus)
 start_advertising()
+mainloop = GLib.MainLoop()
 service_manager.RegisterApplication(app.path, {},
                                     reply_handler=register_app_cb,
                                     error_handler=register_app_error_cb)
-mainloop = GLib.MainLoop()
+
 mainloop.run()
