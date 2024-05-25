@@ -130,12 +130,14 @@ class Application(dbus.service.Object):
 
 def register_app_cb():
     print("GATT application registered")
+    start_advertising()  # Start advertising after successful registration
 
 def register_app_error_cb(error):
     print(f"Failed to register application: {error}")
     mainloop.quit()
 
 def start_advertising():
+    print("Starting advertising...")
     subprocess.run(['sudo', 'hciconfig', 'hci0', 'up'])
     subprocess.run(['sudo', 'hciconfig', 'hci0', 'leadv', '3'])
     subprocess.run(['sudo', 'hciconfig', 'hci0', 'noscan'])
@@ -153,9 +155,14 @@ service_manager = dbus.Interface(bus.get_object('org.bluez', adapter_path), 'org
 app = Application(bus)
 
 mainloop = GLib.MainLoop()
-service_manager.RegisterApplication(app.path, {},
-                                    reply_handler=register_app_cb,
-                                    error_handler=register_app_error_cb)
+try:
+    service_manager.RegisterApplication(app.path, {},
+                                        reply_handler=register_app_cb,
+                                        error_handler=register_app_error_cb)
+    print("RegisterApplication called")
+except Exception as e:
+    print(f"Failed to register application: {e}")
+    mainloop.quit()
 
-start_advertising()
+print("Entering main loop")
 mainloop.run()
