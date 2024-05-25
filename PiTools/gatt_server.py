@@ -141,7 +141,7 @@ def start_advertising():
     subprocess.run(['sudo', 'hciconfig', 'hci0', 'up'])
     subprocess.run(['sudo', 'hciconfig', 'hci0', 'leadv', '3'])
     subprocess.run(['sudo', 'hciconfig', 'hci0', 'noscan'])
-    subprocess.run(['sudo', 'bluetoothctl', 'advertise', 'on'])
+    subprocess.run('echo "advertise on" | sudo bluetoothctl', shell=True)
     print("Advertising started")
 
 dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
